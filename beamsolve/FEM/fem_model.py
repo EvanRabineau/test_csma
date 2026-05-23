@@ -59,7 +59,51 @@ class FEMModel:
         self.K, self.M = self.reduced_matrices()
 
 
+    def element_stiffness(self) -> np.ndarray:
+        r"""
+        Compute the elementary stiffness matrix for an Euler-Bernoulli beam element.
+
+        Returns
+        -------
+        Ke : np.ndarray
+            The 4x4 stiffness matrix for the beam element.
+        """
+
+        E = self.beam.E
+        I = self.beam.I
+        L = self.Le
+
+        Ke = (E * I / L**3) * np.array([
+            [ 12,   6*L,  -12,   6*L],
+            [ 6*L, 4*L**2, -6*L, 2*L**2],
+            [-12,  -6*L,   12,  -6*L],
+            [ 6*L, 2*L**2, -6*L, 4*L**2],
+        ])
+
+        return Ke
     
+    def element_mass(self) -> np.ndarray:
+        r"""
+        Compute the elementary mass matrix for an Euler-Bernoulli beam element.
+
+        Returns
+        -------
+        Me : np.ndarray
+            The 4x4 mass matrix for the beam element.
+        """
+
+        rho = self.beam.rho
+        A   = self.beam.A
+        L   = self.Le
+
+        Me = (rho * A * L / 420) * np.array([
+            [156,    22*L,   54,   -13*L],
+            [22*L,  4*L**2, 13*L, -3*L**2],
+            [54,     13*L, 156,   -22*L],
+            [-13*L, -3*L**2, -22*L, 4*L**2],
+        ])
+
+        return Me
 
     def assemble_global_matrix(self, Me) -> np.ndarray:
         r"""
